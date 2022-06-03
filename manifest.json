@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Confluence downloader",
+  "version": "1.0.0",
+  "description": "Enable to download content from confluence to markdown files along assets",
+  "short_name": "Confludownloder",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://backbase.atlassian.net/*"
+      ],
+      "js": [
+        "lib/marked.min.js",
+        "lib/turndown.js",
+        "contentscript.js"
+      ],
+      "css": [
+      ]
+    }
+  ],
+  "web_accessible_resources": [{
+    "resources": [],
+    "matches": [],
+    "extension_ids": []
+  }],
+  "action": {
+    "default_title": "Settings",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "512": "icons/icon512.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "512": "icons/icon512.png",
+    "128": "icons/icon128.png"
+  }
+}
