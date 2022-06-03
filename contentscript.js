@@ -35,9 +35,9 @@ function ifEnabled(settingName, fn) {
 
 function createHtmlButton(innerHtml, classList, onClick) {
     const button = document.createElement('button');
-    button.style.position= "absolute";
-    button.style.bottom= "10px";
-    button.style.right= "10px";
+    button.style.position = "absolute";
+    button.style.bottom = "10px";
+    button.style.right = "10px";
     button.style.zIndex = "9999";
     button.innerHTML = innerHtml;
     classList.forEach(className => {
@@ -69,6 +69,20 @@ const download = async (url, name, i) => {
 
 const turndownService = new TurndownService();
 
+function flatten(item) {
+    const flat = [];
+
+    item.forEach(item => {
+        if (Array.isArray(item.tokens)) {
+            flat.push(...flatten(item.tokens));
+        } else {
+            flat.push(item);
+        }
+    });
+
+    return flat;
+}
+
 setInterval(async () => {
     await updateNodes('downloadBtn', 'body', async (e) => {
         e.append(createHtmlButton('💾 Download', [], () => {
@@ -77,15 +91,15 @@ setInterval(async () => {
             document.querySelectorAll('#main-content').forEach((e, i) => {
                 let markdownLine = turndownService.turndown(e)
                 const lexer = marked.lexer(markdownLine);
-                if (lexer.length && (lexer[0].tokens || []).length === 1) {
-                    if (lexer[0].tokens[0].type === "image") {
+                flatten(lexer).forEach(token => {
+                    if (token.type === "image") {
                         const image = lexer[0].tokens[0];
                         const url = image.href;
-                        const filename = url.split('/').pop();
+                        const filename = downloadI + ".png";
                         markdownLine = markdownLine.replace(url, './' + filename);
                         download(url, filename, downloadI++)
                     }
-                }
+                });
                 markdown.push(markdownLine);
             })
             download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n')), "README.md")
