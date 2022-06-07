@@ -67,8 +67,39 @@ const download = async (url, name, i) => {
 };
 
 
-const turndownService = new TurndownService();
+const turndownService = new TurndownService({
+    codeBlockStyle: `fenced`
+});
 turndownService.use(turndownPluginGfm.gfm)
+
+// turndownService.use([
+//     function confluenceCodeBlock (turndownService) {
+//         turndownService.addRule('confluenceCodeBlock', {
+//             filter: function (node) {
+//                 var firstChild = node.firstChild;
+//                 return (
+//                     node.nodeName === 'CODE' &&
+//                     node.style.whiteSpace === "pre"
+//                 )
+//             },
+//             replacement: function (content, node, options) {
+//                 Array.from(node.children).filter(node => node.classList.contains("linenumber")).forEach((node, i) => {
+//                     node.innerHTML = i > 0 ? "\n" : "";
+//                     node.style.display = "";
+//                 });
+//                 const parentNode = node.parentElement;
+//                 const pre = document.createElement(`pre`);
+//                 parentNode.appendChild(pre);
+//                 pre.appendChild(node); // Move the code block in a `pre` tag to keep indentation
+//                 console.log(pre.textContent);
+//                 const markdownCode = '\n\n' + options.fence + '\n' +
+//                     node.textContent +
+//                     '\n' + options.fence + '\n\n';
+//                 return markdownCode;
+//             }
+//         });
+//     }
+// ])
 
 function flatten(item) {
     const flat = [];
@@ -93,26 +124,40 @@ function kebabCase(str) {
 
 setInterval(async () => {
     await updateNodes('downloadBtn', 'body', async (e) => {
-        e.append(createHtmlButton('💾 Download', [], () => {
+        e.append(createHtmlButton('💾 Download', [], async () => {
             const title = document.querySelector('h1').textContent || document.title || "Confluence page " + new Date();
             const titleKebabCase = kebabCase(title)
             let markdown = [`# ${title}`];
             let downloadI = 0;
-            document.querySelectorAll('#main-content').forEach((e, i) => {
-                let markdownLine = turndownService.turndown(e)
-                const lexer = marked.lexer(markdownLine);
-                flatten(lexer).forEach(token => {
-                    if (token.type === "image") {
-                        const image = lexer[0].tokens[0];
-                        const url = image.href;
-                        const filename = `${titleKebabCase}-${downloadI}.png`;
-                        markdownLine = markdownLine.replace(url, './' + filename);
-                        download(url, filename, downloadI++)
-                    }
-                });
-                markdown.push(markdownLine);
-            })
-            download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n')), `${titleKebabCase}.md`)
+            const e = document.querySelector('#main-content')
+            let markdownLine = turndownService.turndown(e)
+            const lexer = marked.lexer(markdownLine);
+            flatten(lexer).forEach(token => {
+                if (token.type === "image") {
+                    const image = lexer[0].tokens[0];
+                    const url = image.href;
+                    const filename = `${titleKebabCase}-${downloadI}.png`;
+                    markdownLine = markdownLine.replace(url, './' + filename);
+                    download(url, filename, downloadI++)
+                }
+            });
+            markdown.push(markdownLine);
+
+            await download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n')), `${titleKebabCase}.md`)
         }))
+    })
+
+    await new Promise(resolve => {
+        Array.from(document.querySelectorAll('code')).filter(node => node.style.whiteSpace === "pre").forEach(node => {
+            Array.from(node.children).filter(node => node.classList.contains("linenumber")).forEach((node, i) => {
+                node.innerHTML = "";
+            });
+            const parentNode = node.parentElement;
+            const pre = document.createElement(`pre`);
+            parentNode.appendChild(pre);
+            pre.appendChild(node); // Move the code block in a `pre` tag to keep indentation
+            console.log(pre.textContent);
+        })
+        resolve();
     })
 }, 500);
