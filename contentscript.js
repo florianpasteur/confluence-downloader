@@ -143,11 +143,11 @@ setInterval(async () => {
             });
             markdown.push(markdownLine);
 
-            await download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n')), `${titleKebabCase}.md`)
+            await download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n').replaceAll(' ', ' ')), `${titleKebabCase}.md`)
         }))
     })
 
-    await new Promise(resolve => {
+    await updateNodes('codeBlocks', '#main-content',() => {
         Array.from(document.querySelectorAll('code')).filter(node => node.style.whiteSpace === "pre").forEach(node => {
             Array.from(node.children).filter(node => node.classList.contains("linenumber")).forEach((node, i) => {
                 node.innerHTML = "";
@@ -158,6 +158,6 @@ setInterval(async () => {
             pre.appendChild(node); // Move the code block in a `pre` tag to keep indentation
             console.log(pre.textContent);
         })
-        resolve();
     })
+
 }, 500);
