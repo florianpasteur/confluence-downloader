@@ -15,6 +15,7 @@
       "js": [
         "lib/marked.min.js",
         "lib/turndown.js",
+        "lib/turndown-plugin-gfm.js",
         "contentscript.js"
       ],
       "css": [

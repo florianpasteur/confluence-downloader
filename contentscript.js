@@ -68,6 +68,7 @@ const download = async (url, name, i) => {
 
 
 const turndownService = new TurndownService();
+turndownService.use(turndownPluginGfm.gfm)
 
 function flatten(item) {
     const flat = [];
@@ -83,10 +84,19 @@ function flatten(item) {
     return flat;
 }
 
+function kebabCase(str) {
+    return str
+        .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+        .map(x => x.toLowerCase())
+        .join('-');
+}
+
 setInterval(async () => {
     await updateNodes('downloadBtn', 'body', async (e) => {
         e.append(createHtmlButton('💾 Download', [], () => {
-            let markdown = ["# " + turndownService.turndown(document.querySelector('h2'))];
+            const title = document.querySelector('h1').textContent || document.title || "Confluence page " + new Date();
+            const titleKebabCase = kebabCase(title)
+            let markdown = [`# ${title}`];
             let downloadI = 0;
             document.querySelectorAll('#main-content').forEach((e, i) => {
                 let markdownLine = turndownService.turndown(e)
@@ -95,14 +105,14 @@ setInterval(async () => {
                     if (token.type === "image") {
                         const image = lexer[0].tokens[0];
                         const url = image.href;
-                        const filename = downloadI + ".png";
+                        const filename = `${titleKebabCase}-${downloadI}.png`;
                         markdownLine = markdownLine.replace(url, './' + filename);
                         download(url, filename, downloadI++)
                     }
                 });
                 markdown.push(markdownLine);
             })
-            download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n')), "README.md")
+            download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n')), `${titleKebabCase}.md`)
         }))
     })
 }, 500);
