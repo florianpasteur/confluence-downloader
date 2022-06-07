@@ -68,7 +68,9 @@ const download = async (url, name, i) => {
 
 
 const turndownService = new TurndownService({
-    codeBlockStyle: `fenced`
+    codeBlockStyle: `fenced`,
+    headingStyle: `atx`,
+    hr: `----------`
 });
 turndownService.use(turndownPluginGfm.gfm)
 
