@@ -136,8 +136,7 @@ setInterval(async () => {
             const lexer = marked.lexer(markdownLine);
             flatten(lexer).forEach(token => {
                 if (token.type === "image") {
-                    const image = lexer[0].tokens[0];
-                    const url = image.href;
+                    const url = token.href;
                     const filename = `${titleKebabCase}-${downloadI}.png`;
                     markdownLine = markdownLine.replace(url, './' + filename);
                     download(url, filename, downloadI++)
