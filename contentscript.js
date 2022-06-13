@@ -74,34 +74,20 @@ const turndownService = new TurndownService({
 });
 turndownService.use(turndownPluginGfm.gfm)
 
-// turndownService.use([
-//     function confluenceCodeBlock (turndownService) {
-//         turndownService.addRule('confluenceCodeBlock', {
-//             filter: function (node) {
-//                 var firstChild = node.firstChild;
-//                 return (
-//                     node.nodeName === 'CODE' &&
-//                     node.style.whiteSpace === "pre"
-//                 )
-//             },
-//             replacement: function (content, node, options) {
-//                 Array.from(node.children).filter(node => node.classList.contains("linenumber")).forEach((node, i) => {
-//                     node.innerHTML = i > 0 ? "\n" : "";
-//                     node.style.display = "";
-//                 });
-//                 const parentNode = node.parentElement;
-//                 const pre = document.createElement(`pre`);
-//                 parentNode.appendChild(pre);
-//                 pre.appendChild(node); // Move the code block in a `pre` tag to keep indentation
-//                 console.log(pre.textContent);
-//                 const markdownCode = '\n\n' + options.fence + '\n' +
-//                     node.textContent +
-//                     '\n' + options.fence + '\n\n';
-//                 return markdownCode;
-//             }
-//         });
-//     }
-// ])
+turndownService.use([
+    function confluenceBlockquote (turndownService) {
+        turndownService.addRule('blockquote', {
+            filter: function (node) {
+                return  node.dataset.panelType === "info"
+            },
+            replacement: function (content) {
+                content = content.replace(/^\n+|\n+$/g, '')
+                content = content.replace(/^/gm, '> ')
+                return '\n\n' + content + '\n\n'
+            }
+        });
+    }
+])
 
 function flatten(item) {
     const flat = [];
