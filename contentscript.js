@@ -33,19 +33,22 @@ function ifEnabled(settingName, fn) {
 }
 
 
-function createHtmlButton(innerHtml, classList, onClick) {
-    const button = document.createElement('button');
-    button.style.position = "absolute";
-    button.style.bottom = "10px";
-    button.style.right = "10px";
-    button.style.zIndex = "9999";
-    button.innerHTML = innerHtml;
-    classList.forEach(className => {
-        button.classList.add(className)
-    })
-    button.addEventListener('click', onClick);
+function createMenuOption(content, classList, onClick) {
+    const menu = document.querySelector('[role=menu]');
+    const subMenu = menu.firstChild;
+    const subMenuButton = subMenu.querySelector('button');
 
-    return button;
+    const newSubMenu = document.createElement(subMenu.nodeName);
+    newSubMenu.classList.add(...subMenu.classList.values());
+    const newButton = document.createElement('button');
+    newButton.classList.add(...subMenuButton.classList.values());
+    newButton.classList.add(...classList);
+    newButton.addEventListener('click', onClick);
+    newButton.innerText = content;
+
+    newSubMenu.appendChild(newButton);
+    menu.appendChild(newSubMenu);
+    return newButton;
 }
 
 const delay = milliseconds => new Promise(resolve => {
@@ -111,8 +114,8 @@ function kebabCase(str) {
 }
 
 setInterval(async () => {
-    await updateNodes('downloadBtn', 'body', async (e) => {
-        e.append(createHtmlButton('💾 Download', [], async () => {
+    await updateNodes('downloadBtn', '[role=menu]', async (e) => {
+        createMenuOption("Export as Markdown", [], async () => {
             const title = document.querySelector('h1').textContent || document.title || "Confluence page " + new Date();
             const titleKebabCase = kebabCase(title)
             let markdown = [`# ${title}`];
@@ -131,7 +134,7 @@ setInterval(async () => {
             markdown.push(markdownLine);
 
             await download('data:text/plain;charset=utf-8,' + encodeURIComponent(markdown.join('\n').replaceAll(' ', ' ')), `${titleKebabCase}.md`)
-        }))
+        })
     })
 
     await updateNodes('codeBlocks', '#main-content',() => {
