@@ -19,6 +19,7 @@
         "contentscript.js"
       ],
       "css": [
+        "style.css"
       ]
     }
   ],

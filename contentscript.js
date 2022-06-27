@@ -76,6 +76,10 @@ const turndownService = new TurndownService({
     hr: `----------`
 });
 turndownService.use(turndownPluginGfm.gfm)
+turndownService.use(turndownPluginGfm.tables)
+turndownService.use(turndownPluginGfm.strikethrough)
+turndownService.use(turndownPluginGfm.taskListItems)
+turndownService.use(turndownPluginGfm.highlightedCodeBlock)
 
 turndownService.use([
     function confluenceBlockquote (turndownService) {
@@ -139,8 +143,8 @@ setInterval(async () => {
 
     await updateNodes('codeBlocks', '#main-content',() => {
         Array.from(document.querySelectorAll('code')).filter(node => node.style.whiteSpace === "pre").forEach(node => {
-            Array.from(node.children).filter(node => node.classList.contains("linenumber")).forEach((node, i) => {
-                node.innerHTML = "";
+            node.querySelectorAll('.linenumber').forEach((node, i) => {
+                node.innerHTML = " ";
             });
             const parentNode = node.parentElement;
             const pre = document.createElement(`pre`);
