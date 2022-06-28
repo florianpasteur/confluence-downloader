@@ -94,7 +94,62 @@ turndownService.use([
             }
         });
     }
+]);
+
+turndownService.use([
+    function gfmTableWithoutHeading (turndownService) {
+        turndownService.addRule('table', {
+            filter: 'table',
+            replacement: function (content, node) {
+                const initialLineColumns = node.querySelector('tr').querySelectorAll('td');
+
+                const nbOfCharactersLongestCell = getNbOfCharactersLongestCell(node);
+                const spaces =  " ".repeat(Math.max(0, nbOfCharactersLongestCell))
+                const dashes =  "-".repeat(Math.max(0, nbOfCharactersLongestCell))
+
+                const tableHeader = '|' + (spaces + '|').repeat(initialLineColumns.length) + '\n' +
+                    '|' + (dashes + '|').repeat(initialLineColumns.length);
+
+                return '\n\n' + tableHeader + content + '\n\n'
+            }
+        });
+    },
+    function gfmTableCellWithoutHeading (turndownService) {
+        turndownService.addRule('tableCell', {
+            filter: ['th', 'td'],
+            replacement: function (content, node) {
+                const indexOf = Array.prototype.indexOf;
+                const table = findParent(node, "table");
+                const nbOfCharactersLongestCell = getNbOfCharactersLongestCell(table);
+                const inlinedContent = content.replaceAll('\n', ' ');
+                const alignedContent = inlinedContent + " ".repeat(Math.max(0, nbOfCharactersLongestCell - inlinedContent.length))
+                const index = indexOf.call(node.parentNode.childNodes, node);
+                const prefix = (index === 0) ? '| ' : '  ';
+                return prefix + alignedContent + ' |'
+            }
+        });
+    }
 ])
+
+function findParent(node, targetTagName) {
+    while (node.parentElement.tagName !== null) {
+        const parent = node.parentElement;
+        if (parent.tagName === targetTagName.toUpperCase()) {
+            return parent;
+        }
+        node = parent;
+    }
+    throw new Error(targetTagName + " not found as a parent of " + node)
+}
+
+function getNbOfCharactersLongestCell(table) {
+    const cells = [...Array.from(table.querySelectorAll("td")), ...Array.from(table.querySelectorAll("th"))];
+    if (cells.length === 0) {
+        return 0;
+    }
+    const cellLengths = cells.map(t => (t.textContent || "").replaceAll('\n', ' ').length);
+    return Math.max(...cellLengths);
+}
 
 function flatten(item) {
     const flat = [];
