@@ -76,7 +76,7 @@ const turndownService = new TurndownService({
     hr: `----------`
 });
 turndownService.use(turndownPluginGfm.gfm)
-turndownService.use(turndownPluginGfm.tables)
+// turndownService.use(turndownPluginGfm.tables)
 turndownService.use(turndownPluginGfm.strikethrough)
 turndownService.use(turndownPluginGfm.taskListItems)
 turndownService.use(turndownPluginGfm.highlightedCodeBlock)
