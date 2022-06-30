@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Confluence downloader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Enable to download content from confluence to markdown files along assets",
   "short_name": "Confludownloder",
   "permissions": [
@@ -23,11 +23,13 @@
       ]
     }
   ],
-  "web_accessible_resources": [{
-    "resources": [],
-    "matches": [],
-    "extension_ids": []
-  }],
+  "web_accessible_resources": [
+    {
+      "resources": [],
+      "matches": [],
+      "extension_ids": []
+    }
+  ],
   "action": {
     "default_title": "Settings",
     "default_popup": "popup.html",
