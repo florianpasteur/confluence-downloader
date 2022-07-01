@@ -56,6 +56,7 @@ const delay = milliseconds => new Promise(resolve => {
 });
 
 const download = async (url, name, i) => {
+    // chrome.runtime.sendMessage({url, filename: name})
     setTimeout(() => {
         const a = document.createElement('a');
 
@@ -64,6 +65,7 @@ const download = async (url, name, i) => {
         a.style.display = 'none';
         a.target = "_blank";
         document.body.append(a);
+        console.log(a);
         a.click();
 
     }, i * 1000);
@@ -101,14 +103,45 @@ function flatten(item) {
     const flat = [];
 
     item.forEach(item => {
-        if (Array.isArray(item.tokens)) {
-            flat.push(...flatten(item.tokens));
-        } else {
-            flat.push(item);
-        }
+        flat.push(flattenTokens(item))
     });
 
-    return flat;
+    return flat.flat();
+}
+
+function flattenTokens(token) {
+    if (!token) {
+        return [];
+    }
+    const tokens = [].concat(...(token.tokens || []), ...getTableTokens(token), ...getListTokens(token));
+    return tokens.reduce((acc, t) => {
+        return [...acc, ...flattenTokens(t)]
+    }, [token])
+}
+
+function getTableTokens (token) {
+    if (!token) {
+        return [];
+    }
+    const tokens = []
+    if (Array.isArray(token.header)) {
+        tokens.push(...token.header.map(h => h.tokens).flat())
+    }
+    if (Array.isArray(token.rows)) {
+        tokens.push(...token.rows.map(r => r.map(({tokens}) => tokens)).flat().flat())
+    }
+    return tokens;
+}
+
+function getListTokens (token) {
+    if (!token) {
+        return [];
+    }
+    const tokens = []
+    if (Array.isArray(token.items)) {
+        tokens.push(...token.items.map(i => i.tokens).flat())
+    }
+    return tokens;
 }
 
 function kebabCase(str) {
@@ -128,7 +161,8 @@ setInterval(async () => {
             const e = document.querySelector('#main-content')
             let markdownLine = turndownService.turndown(e)
             const lexer = marked.lexer(markdownLine);
-            flatten(lexer).forEach(token => {
+            const flatTokens = flatten(lexer);
+            flatTokens.forEach(token => {
                 if (token.type === "image") {
                     const url = token.href;
                     const filename = `${titleKebabCase}-${downloadI}.png`;

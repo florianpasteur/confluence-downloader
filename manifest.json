@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Confluence downloader",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Enable to download content from confluence to markdown files along assets",
   "short_name": "Confludownloder",
   "permissions": [
-    "storage"
+    "storage",
+    "downloads"
   ],
   "content_scripts": [
     {
@@ -41,5 +42,8 @@
   "icons": {
     "512": "icons/icon512.png",
     "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
   }
 }
