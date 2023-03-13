@@ -2,7 +2,7 @@
 
 ## Disclaimer
 
-This extension will alter the normal behaviour of eduflow, use at your own risk. 
+This extension will alter the normal behaviour of confluence, use at your own risk. 
 
 ## Installation
 
