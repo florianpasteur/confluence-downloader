@@ -96,6 +96,21 @@ turndownService.use([
                 return '\n\n' + content + '\n\n'
             }
         });
+    },
+    function confluenceAccordion (turndownService) {
+        turndownService.addRule('accordion', {
+            filter: function (node) {
+                return  node.dataset.nodeType === "expand"
+            },
+            replacement: function (content, node) {
+                const title = node.dataset.title;
+                content = this.process.r
+                return '<details>\n' +
+                       `<summary>${title}</summary>\n` +
+                       '\n\n' + content + '\n\n' +
+                       '</details>'
+            }
+        });
     }
 ])
 
